@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Extension Lookup</title>
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Lookup Data Extension</h1>
+
+        <!-- Lookup value input form -->
+        <form action="/results" method="POST" class="space-y-6">
+            <div>
+                <label for="lookup-value" class="block text-gray-700 font-semibold mb-2">Enter Lookup Value:</label>
+                <input type="text" id="lookup-value" name="lookup_value" required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200 focus:outline-none focus:border-indigo-400">
+            </div>
+            <div>
+                <button type="submit"
+                    class="w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-md shadow-md hover:bg-indigo-700 transition duration-300">
+                    Search
+                </button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
