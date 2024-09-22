@@ -8,7 +8,7 @@ This is a simple Flask web application for interacting with Salesforce Marketing
 	•	Salesforce Marketing Cloud credentials
 	•	Flask framework
 
-Setup Instructions
+# Setup Instructions
 
 ## 1. Clone the Repository
 
