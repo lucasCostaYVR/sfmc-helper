@@ -1,8 +1,8 @@
-SFMC Data Extension Lookup
+# SFMC Data Extension Lookup
 
 This is a simple Flask web application for interacting with Salesforce Marketing Cloud (SFMC) Data Extensions. Users can look up data from multiple Data Extensions by providing a lookup value. The app retrieves data from SFMC using the SOAP API and displays it in a user-friendly table format.
 
-Prerequisites
+## Prerequisites
 
 	•	Python 3.7+
 	•	Salesforce Marketing Cloud credentials
