@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Lookup Configuration{% endblock %}
+{% block header %}Lookup Configuration{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-semibold mb-6">Edit Lookup Configurations</h1>
+
+    <!-- Display flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="mb-4">
+          {% for category, message in messages %}
+            {% if category == 'success' %}
+              {% set alert_class = 'bg-green-100 text-green-800' %}
+            {% elif category == 'error' %}
+              {% set alert_class = 'bg-red-100 text-red-800' %}
+            {% elif category == 'warning' %}
+              {% set alert_class = 'bg-yellow-100 text-yellow-800' %}
+            {% else %}
+              {% set alert_class = 'bg-blue-100 text-blue-800' %}
+            {% endif %}
+            <div class="p-4 mb-4 rounded {{ alert_class }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('lookup_config') }}">
+        <!-- CSRF Token (if using Flask-WTF) -->
+        {% csrf_token %}
+        <input type="hidden" name="total_records" value="{{ lookups|length }}">
+        <table class="min-w-full bg-white border border-gray-200">
+            <thead>
+                <tr>
+                    <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">External Key</th>
+                    <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">Lookup Field</th>
+                    <th class="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lookup in lookups %}
+                <tr>
+                    <td class="py-3 px-4 border-b">
+                        <input type="text" name="external_key_{{ loop.index0 }}" value="{{ lookup.ExternalKey }}"
+                            class="w-full border border-gray-300 rounded-md p-2">
+                    </td>
+                    <td class="py-3 px-4 border-b">
+                        <input type="text" name="lookup_field_{{ loop.index0 }}" value="{{ lookup.LookupField }}"
+                            class="w-full border border-gray-300 rounded-md p-2">
+                    </td>
+                    <td class="py-3 px-4 border-b text-center">
+                        <!-- Add a delete checkbox -->
+                        <input type="checkbox" name="delete_{{ loop.index0 }}" value="1" class="form-checkbox">
+                        <label for="delete_{{ loop.index0 }}" class="ml-2">Delete</label>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Add New Record Section -->
+        <h2 class="text-xl font-semibold mt-6 mb-4">Add New Lookup</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+                <label for="new_external_key" class="block text-gray-700 font-semibold mb-2">External Key</label>
+                <input type="text" name="new_external_key" id="new_external_key"
+                    class="w-full border border-gray-300 rounded-md p-2">
+            </div>
+            <div>
+                <label for="new_lookup_field" class="block text-gray-700 font-semibold mb-2">Lookup Field</label>
+                <input type="text" name="new_lookup_field" id="new_lookup_field"
+                    class="w-full border border-gray-300 rounded-md p-2">
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between">
+            <button type="submit"
+                class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-300">
+                Save Changes
+            </button>
+            <a href="{{ url_for('lookup') }}"
+                class="text-indigo-600 hover:text-indigo-800 transition duration-300">Back to Lookup</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

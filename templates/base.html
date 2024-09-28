@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SFMC Helper{% endblock %}</title>
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    {% endblock %}
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white shadow">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+            <!-- Logo -->
+            <div class="flex items-center space-x-2">
+                <span class="text-2xl font-bold text-indigo-600">SFMC Helper</span>
+            </div>
+            <!-- Navigation -->
+            <nav class="hidden md:flex space-x-6">
+                <a href="/" class="text-gray-700 hover:text-indigo-600 {% if request.path == '/' %}font-semibold{% endif %}">Home</a>
+                <a href="/lookup" class="text-gray-700 hover:text-indigo-600 {% if request.path == '/lookup' %}font-semibold{% endif %}">Lookup</a>
+                <a href="{{ url_for('automation-docs') }}" class="text-gray-700 hover:text-indigo-600 {% if request.path == url_for('automation-docs') %}font-semibold{% endif %}">Automation Docs</a>
+            </nav>
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+                <button id="menu-btn" class="text-gray-700 hover:text-indigo-600 focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="hidden md:hidden">
+            <nav class="px-4 pt-2 pb-4 space-y-1">
+                <a href="/" class="block text-gray-700 hover:text-indigo-600 {% if request.path == '/' %}font-semibold{% endif %}">Home</a>
+                <a href="/lookup" class="block text-gray-700 hover:text-indigo-600 {% if request.path == '/lookup' %}font-semibold{% endif %}">Lookup</a>
+                <a href="{{ url_for('automation-docs') }}" class="block text-gray-700 hover:text-indigo-600 {% if request.path == url_for('automation-docs') %}font-semibold{% endif %}">Automation Docs</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        <!-- Breadcrumbs -->
+        {% if breadcrumbs %}
+        <nav class="text-sm mb-4">
+            <ol class="list-reset flex text-gray-600">
+                {% for breadcrumb in breadcrumbs %}
+                    {% if not loop.last %}
+                        <li><a href="{{ breadcrumb.url }}" class="text-indigo-600 hover:underline">{{ breadcrumb.name }}</a></li>
+                        <li><span class="mx-2">/</span></li>
+                    {% else %}
+                        <li>{{ breadcrumb.name }}</li>
+                    {% endif %}
+                {% endfor %}
+            </ol>
+        </nav>
+        {% endif %}
+
+        <!-- Page Header -->
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">{% block header %}{% endblock %}</h1>
+        </div>
+
+        <!-- Notifications -->
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="bg-{{ message.tag }}-100 border-l-4 border-{{ message.tag }}-500 text-{{ message.tag }}-700 p-4 mb-2" role="alert">
+                    <p>{{ message }}</p>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Main Content Area -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            {% block content %}
+            <!-- Default content (can be overridden) -->
+            <p class="text-gray-600">No content available.</p>
+            {% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white shadow">
+        <div class="container mx-auto px-4 py-4 text-center text-gray-600">
+            &copy; {{ current_year }} SFMC Helper
+        </div>
+    </footer>
+
+    <!-- JavaScript for Mobile Menu Toggle -->
+    <script>
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>

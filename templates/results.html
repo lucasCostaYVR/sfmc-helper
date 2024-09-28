@@ -1,55 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lookup Results</title>
-    <!-- Tailwind CSS CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-100 min-h-screen p-8">
-    <div class="container mx-auto">
-        <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Results for "{{ lookup_value }}"</h1>
+{% extends "base.html" %}
 
-        <!-- Loop through each Data Extension's results -->
-        {% for result in results %}
-            <div class="mb-8">
-                <h2 class="text-xl font-semibold text-indigo-600 mb-4">Data Extension: {{ result.external_key }}</h2>
-                
-                <!-- Check if there's any data to display -->
-                {% if result.data %}
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full bg-white shadow-md rounded-lg">
-                            <thead class="bg-indigo-600 text-white">
+{% block title %}Lookup Results{% endblock %}
+
+{% block content %}
+<div class="container mx-auto">
+    <p class="text-xl font-bold text-gray-800 mb-8 text-center">Results for "{{ lookup_value }}"</p>
+
+    <!-- Loop through each Data Extension's results -->
+    {% for result in results %}
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-indigo-600 mb-4">Data Extension: {{ result.external_key }}</h2>
+
+            <!-- Check if there's any data to display -->
+            {% if result.data %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white shadow-md rounded-lg">
+                        <thead class="bg-indigo-600 text-white">
+                            <tr>
+                                <!-- Assuming that the first row contains all the possible headers (fields) -->
+                                {% for key, value in result.data[0].items() %}
+                                    <th class="py-2 px-4 text-left">{{ key }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <!-- Loop through each row of data -->
+                            {% for row in result.data %}
                                 <tr>
-                                    <!-- Assuming that the first row contains all the possible headers (fields) -->
-                                    {% for key, value in result.data[0].items() %}
-                                        <th class="py-2 px-4 text-left">{{ key }}</th>
+                                    {% for key, value in row.items() %}
+                                        <td class="py-2 px-4">{{ value }}</td>
                                     {% endfor %}
                                 </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <!-- Loop through each row of data -->
-                                {% for row in result.data %}
-                                    <tr>
-                                        {% for key, value in row.items() %}
-                                            <td class="py-2 px-4">{{ value }}</td>
-                                        {% endfor %}
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <p class="text-red-500">No data found for this Data Extension.</p>
-                {% endif %}
-            </div>
-        {% endfor %}
-
-        <!-- Add a link to go back to the main lookup form -->
-        <div class="mt-8 text-center">
-            <a href="/" class="inline-block bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-300">Perform another lookup</a>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-red-500">No data found for this Data Extension.</p>
+            {% endif %}
         </div>
+    {% endfor %}
+
+    <!-- Add a link to go back to the main lookup form -->
+    <div class="mt-8 text-center">
+        <a href="/" class="inline-block bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-300">Perform another lookup</a>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

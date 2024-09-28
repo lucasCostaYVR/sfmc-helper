@@ -1,8 +1,9 @@
-from sfmc_helper.auth.client import SFMCClient
-import logging
-from typing import Literal, Union
-from sfmc_helper.filters.filters import SimpleFilter, ComplexFilter, LogicalOperator, SimpleOperator
+# data_extension.py
 
+import logging
+from typing import Union
+from sfmc_helper.filters.filters import SimpleFilter, ComplexFilter
+from settings import client  # Import the client from settings.py
 
 logger = logging.getLogger(__name__)
 
@@ -10,8 +11,9 @@ class DataExtension:
     """
     A class for interacting with SFMC Data Extensions.
     """
-    def __init__(self, client: SFMCClient, external_key: str = None):
-        self.client = client
+
+    def __init__(self, external_key: str = None):
+        self.client = client  # Use the client from settings.py
         self.external_key = external_key
         self.name = None
         self.details = {}
@@ -48,15 +50,20 @@ class DataExtension:
         }
 
         response = self.client.soap_client.retrieve(object_type, properties, filter)
-        
+
         # Handling the response and extracting 'Results' from the 'soap:Body'
         results = response.get('soap:Envelope', {}).get('soap:Body', {}).get('RetrieveResponseMsg', {}).get('Results', None)
         logger.info(f"Data Extension fields: {results}")
+
         if results:
+            # Ensure results is a list
+            if not isinstance(results, list):
+                results = [results]
+
             for result in results:
-                if result.get('IsPrimaryKey', False) == 'true':
+                if result.get('IsPrimaryKey', 'false') == 'true':
                     self.primary_keys.append(result.get('Name'))
-            return results if isinstance(results, list) else [results]  # Ensure results is a list
+            return results
         else:
             logger.error(f"No fields found for Data Extension with CustomerKey: {self.external_key}")
             return []
@@ -83,9 +90,13 @@ class DataExtension:
         # Handling the response and extracting 'Results' from the 'soap:Body'
         results = response.get('soap:Envelope', {}).get('soap:Body', {}).get('RetrieveResponseMsg', {}).get('Results', None)
         logger.info(f"Data Extension results: {results}")
+
         if results:
-            self.name = results['Name']
-            return results if isinstance(results, dict) else results[0]  # Return the first result if multiple exist
+            # Ensure results is a dictionary
+            if isinstance(results, list):
+                results = results[0]  # Take the first result if multiple exist
+            self.name = results.get('Name')
+            return results
         else:
             logger.error(f"No Data Extension found with CustomerKey: {self.external_key}")
             return {}
@@ -150,7 +161,7 @@ class DataExtension:
             if isinstance(properties, dict):
                 properties = [properties]
             for item in properties:
-                row_dict[item["Name"]] = item["Value"]
+                row_dict[item["Name"]] = item.get("Value")
             parsed_data.append(row_dict)
 
         return parsed_data

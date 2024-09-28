@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Automation Details{% endblock %}
+{% block header %}Automation Details{% endblock %}
+
+{% block content %}
+    <!-- Generate the Markdown content -->
+    {% set ns = namespace(markdown_content='') %}
+    {% set ns.markdown_content = ns.markdown_content + '# ' + automation.name|default('N/A', boolean=True) + '\n\n' %}
+    {% for step in automation.steps %}
+        {% set ns.markdown_content = ns.markdown_content + '## Step ' + step.step|string + ': ' + step.name|default('N/A', boolean=True) + '\n\n' %}
+        {% if step.activities %}
+            {% for activity in step.activities %}
+                {% set ns.markdown_content = ns.markdown_content + '- **Activity Name**: ' + activity.name|default('N/A', boolean=True) + '\n' %}
+                {% set ns.markdown_content = ns.markdown_content + '  - **Type**: ' + activity.type|default('N/A', boolean=True) + '\n' %}
+                {% set ns.markdown_content = ns.markdown_content + '  - **Target Data Extension**: ' + activity.target_de|default('N/A', boolean=True) + '\n' %}
+                {% if activity.type == "Query Activity" %}
+                    {% set ns.markdown_content = ns.markdown_content + '  - **Query**:\n\n' %}
+                    {% set ns.markdown_content = ns.markdown_content + '```sql\n' %}
+                    {% set ns.markdown_content = ns.markdown_content + activity.query|default('', boolean=True) + '\n' %}
+                    {% set ns.markdown_content = ns.markdown_content + '```\n' %}
+                {% endif %}
+            {% endfor %}
+            {% set ns.markdown_content = ns.markdown_content + '\n' %}
+        {% else %}
+            {% set ns.markdown_content = ns.markdown_content + 'No activities for this step.\n\n' %}
+        {% endif %}
+    {% endfor %}
+
+    <div class="space-y-6">
+        <!-- Copy Documentation Button -->
+        <div class="flex justify-end">
+            <button type="button" id="copy-docs-button" class="text-white bg-green-500 hover:bg-green-600 font-medium py-2 px-4 rounded">
+                Copy Documentation
+            </button>
+        </div>
+
+        <!-- Automation Name -->
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ automation.name }}</h1>
+        </div>
+
+        {% if automation.steps %}
+            <!-- Activities Table -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-200">
+                    <thead>
+                        <tr class="bg-gray-100 border-b">
+                            <th class="py-3 px-4 font-semibold text-sm text-gray-600 text-left">Step #</th>
+                            <th class="py-3 px-4 font-semibold text-sm text-gray-600 text-left">Activity Name</th>
+                            <th class="py-3 px-4 font-semibold text-sm text-gray-600 text-left">Activity Type</th>
+                            <th class="py-3 px-4 font-semibold text-sm text-gray-600 text-left">Target Data Extension</th>
+                            <th class="py-3 px-4 font-semibold text-sm text-gray-600 text-left">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for step in automation.steps %}
+                            {% if step.activities %}
+                                {% for activity in step.activities %}
+                                    <tr class="border-b hover:bg-gray-50">
+                                        <td class="py-3 px-4 text-sm text-gray-700">Step {{ step.step }}</td>
+                                        <td class="py-3 px-4 text-sm text-gray-800">{{ activity.name }}</td>
+                                        <td class="py-3 px-4 text-sm">
+                                            <span class="inline-flex items-center">
+                                                <!-- Activity Type Icon -->
+                                                {% if activity.type == "Query Activity" %}
+                                                    <svg class="w-5 h-5 text-blue-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 014-4h7"/>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8"/>
+                                                    </svg>
+                                                {% else %}
+                                                    <svg class="w-5 h-5 text-gray-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                    </svg>
+                                                {% endif %}
+                                                <span class="text-gray-800">{{ activity.type }}</span>
+                                            </span>
+                                        </td>
+                                        <td class="py-3 px-4 text-sm text-gray-700">{{ activity.target_de|default('N/A', boolean=True) }}</td>
+                                        <td class="py-3 px-4 text-sm">
+                                            {% if activity.type == "Query Activity" %}
+                                                <button type="button" class="text-white bg-blue-500 hover:bg-blue-600 font-medium py-1 px-2 rounded" onclick="openModal('{{ activity.id }}')">
+                                                    View Query
+                                                </button>
+                                            {% else %}
+                                                <span class="text-gray-500">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="py-3 px-4 text-sm text-red-500 text-center">No activities for Step {{ step.step }}</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-red-500">No steps found for this automation.</p>
+        {% endif %}
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div id="modal-content" class="bg-white rounded-lg shadow-lg overflow-auto max-w-3xl max-h-full relative">
+            <!-- Close Button -->
+            <button type="button" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onclick="closeModal()">
+                &times;
+            </button>
+            <!-- Modal Body -->
+            <div class="p-6">
+                <h2 id="modal-query-name" class="text-xl font-semibold mb-2"></h2>
+                <p id="modal-target-de" class="text-gray-600 mb-4"></p>
+                <pre><code id="modal-query-text" class="language-sql"></code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include Prism.js CSS and JS with Dark Theme -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+
+    <!-- JavaScript to handle the modal functionality and copy documentation -->
+    <script>
+        // Store activity queries and additional data in a JavaScript object
+        const activityQueries = {
+            {% for step in automation.steps %}
+                {% for activity in step.activities %}
+                    {% if activity.type == "Query Activity" %}
+                        '{{ activity.id }}': {
+                            'name': {{ activity.name|default('N/A', boolean=True)|tojson }},
+                            'target_de': {{ activity.target_de|default('N/A', boolean=True)|tojson }},
+                            'query': {{ activity.query|default('', boolean=True)|tojson }}
+                        },
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        };
+
+        // Function to open the modal and display the query and additional info
+        function openModal(activityId) {
+            // Get the modal elements
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalQueryName = document.getElementById('modal-query-name');
+            const modalTargetDE = document.getElementById('modal-target-de');
+            const modalQueryText = document.getElementById('modal-query-text');
+
+            // Find the activity's data
+            const activityData = activityQueries[activityId];
+
+            // Set the query name and target data extension
+            modalQueryName.textContent = activityData.name;
+            modalTargetDE.textContent = 'Target Data Extension: ' + (activityData.target_de || 'N/A');
+
+            // Set the query text inside the modal
+            modalQueryText.textContent = activityData.query;
+
+            // Re-highlight the code using Prism.js
+            Prism.highlightElement(modalQueryText);
+
+            // Show the modal
+            modalOverlay.classList.remove('hidden');
+        }
+
+        // Function to close the modal
+        function closeModal() {
+            const modalOverlay = document.getElementById('modal-overlay');
+            modalOverlay.classList.add('hidden');
+        }
+
+        // Close the modal when clicking outside the modal content
+        document.getElementById('modal-overlay').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeModal();
+            }
+        });
+
+        // Copy Documentation Functionality
+        document.getElementById('copy-docs-button').addEventListener('click', function() {
+            const markdownContent = {{ ns.markdown_content|tojson }};
+            navigator.clipboard.writeText(markdownContent)
+                .then(() => {
+                    const copyButton = document.getElementById('copy-docs-button');
+                    // Change button text to "Copied"
+                    copyButton.textContent = 'Copied';
+
+                    // Disable the button to prevent multiple clicks
+                    copyButton.disabled = true;
+
+                    // Revert back after 5 seconds
+                    setTimeout(() => {
+                        copyButton.textContent = 'Copy Documentation';
+                        copyButton.disabled = false;
+                    }, 5000);
+                })
+                .catch(err => {
+                    console.error('Could not copy text: ', err);
+                });
+        });
+    </script>
+{% endblock %}

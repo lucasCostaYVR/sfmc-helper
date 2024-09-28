@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Automation Docs Builder{% endblock %}
+{% block header %}Automation Docs Builder{% endblock %}
+
+{% block content %}
+    <div class="mb-6">
+        <p class="text-gray-700 font-semibold mb-4">{{ automations|length }} Result(s) for "{{ automation_name }}"</p>
+    </div>
+    {% if automations %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-200">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="py-3 px-4 font-semibold text-sm text-gray-600 text-left">Automation Name</th>
+                        <th class="py-3 px-4 font-semibold text-sm text-gray-600 text-left">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for automation in automations %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-4 text-sm text-indigo-600">
+                                <a href="{{ url_for('automation-details', automation_id=automation.id) }}" class="hover:underline">{{ automation.name }}</a>
+                            </td>
+                            <td class="py-3 px-4 text-sm text-gray-700">{{ automation.description or 'N/A' }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-red-500">No automations found for "{{ automation_name }}".</p>
+    {% endif %}
+{% endblock %}

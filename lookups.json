@@ -1,4 +1,5 @@
 [
     {"ExternalKey": "MyDataExtensionLookup1", "LookupField": "LookupField"},
-    {"ExternalKey": "MyDataExtensionLookup2", "LookupField": "LookupField"}
+    {"ExternalKey": "MyDataExtensionLookup2", "LookupField": "LookupField"},
+    {"ExternalKey": "SubscriberKeyLookup", "LookupField": "EmailAddress"}
 ]
